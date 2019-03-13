@@ -82,7 +82,8 @@ void MergePhysics(const fs::path& path, marathon::Wad& wad, std::ostream& log)
 			if (!physics.HasChunk(*it))
 			{
 				fs::path file = path.parent() / path.filename();
-				log << file.string() << " is not a valid physics model; skipping" << std::endl;
+			//	log << file.string() << " is not a valid physics model; skipping" << std::endl;
+				log << file.string() << " は、有効な物理モデルではありません。スキップします。" << std::endl;
 				return;
 			}
 		}
@@ -111,7 +112,8 @@ void MergeShapes(const fs::path& path, marathon::Wad& wad, std::ostream& log)
 	else
 	{
 		fs::path file = path.parent() / path.filename();
-		log << file.string() << " is larger than 384K; skipping" << std::endl;
+		// log << file.string() << " is larger than 384K; skipping" << std::endl;
+		log << file.string() << "は、ファイルサイズが384kを超えています。スキップします。" << std::endl;
 	}
 }
 
@@ -192,7 +194,8 @@ marathon::Wad CreateWad(const fs::path& path, std::ostream& log)
 	if (maps.size())
 	{
 		if (maps.size() > 1)
-			log << path.string() << ": multiple maps found; using " << maps[0].string() << std::endl;
+			//log << path.string() << ": multiple maps found; using " << maps[0].string() << std::endl;
+			log << path.string() << "には、複数のマップが存在します。 以下のマップを使用します：" << maps[0].string() << std::endl;
 
 		marathon::Unimap wadfile;
 		if (wadfile.Open(maps[0].string()) && wadfile.data_version() == 1)
@@ -203,20 +206,23 @@ marathon::Wad CreateWad(const fs::path& path, std::ostream& log)
 			if (physics.size())
 			{
 				if (physics.size() > 1)
-					log << path.string() << ": multiple physics models found; using " << physics[0].string() << std::endl;
+				//	log << path.string() << ": multiple physics models found; using " << physics[0].string() << std::endl;
+					log << path.string() << "には、複数の物理モデルが存在します。 以下の物理モデルを使用します：" << physics[0].string() << std::endl;
 
 				MergePhysics(physics[0], wad, log);
 			}
 			if (shapes.size())
 			{
 				if (shapes.size() > 1)
-					log << path.string() << ": multiple shapes patches found; using " << shapes[0].string() << std::endl;
+			//		log << path.string() << ": multiple shapes patches found; using " << shapes[0].string() << std::endl;
+					log << path.string() << "には、複数の形態パッチが存在します。 以下の形態パッチを使用します：" << shapes[0].string() << std::endl;
 				MergeShapes(shapes[0], wad, log);
 			}
 			if (terminals.size())
 			{
 				if (terminals.size() > 1)
-					log << path.string() << ": multiple terminal texts files found; using " << terminals[0].string() << std::endl;
+			//		log << path.string() << ": multiple terminal texts files found; using " << terminals[0].string() << std::endl;
+					log << path.string() << "には、複数のターミナルテキストが存在します。 以下のターミナルテキストを使用します：" << terminals[0].string() << std::endl;
 				MergeTerminal(terminals[0], wad, log);
 			}
 			if (luas.size())
@@ -233,9 +239,9 @@ marathon::Wad CreateWad(const fs::path& path, std::ostream& log)
 	}
 	else
 	{
-		throw merge_error(path.string() + " does not contain a map");
+		throw merge_error(path.string() + "には、マップが含まれていません。");
 	}
-	
+
 	return wad;
 }
 
@@ -382,11 +388,11 @@ void atque::merge(const std::string& src, const std::string& dest, std::ostream&
 {
 	if (!fs::exists(src))
 	{
-		throw merge_error(src + " does not exist");
+		throw merge_error(src + "は見つかりません。");
 	}
 	else if (!fs::is_directory(src))
 	{
-		throw merge_error("source must be a directory");
+		throw merge_error("ソースはディレクトリである必要があります。");
 	}
 
 	marathon::Unimap wadfile;

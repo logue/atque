@@ -20,6 +20,7 @@
 
 #include "AStream.h"
 #include "ferro/macroman.h"
+#include "ferro/converter.h"
 #include "ferro/TerminalChunk.h"
 
 #include <fstream>
@@ -234,7 +235,7 @@ static std::string get_line(std::istream& stream)
 		stream.get(c);
 
 	};
-
+        
 	return utf8_to_mac_roman(line);
 }
 
@@ -335,11 +336,20 @@ static bool calculate_line(char *base_text, short width, short start_index, shor
 		int index = start_index, running_width = 0;
 		
 		while (running_width < width && base_text[index] && base_text[index] != '\r') {
-			if (base_text[index] == '\t' || base_text[index] >= ' ')
+			if (base_text[index] == '\t' || (unsigned char)base_text[index] >= ' ')
 				running_width += 7;
 			index++;
 		}
-		
+                //　TODO;
+		if( (unsigned char)base_text[index] > 0x7f && 
+                    (unsigned char)base_text[index] < 0xe0 || 
+                    (unsigned char)base_text[index] > 0xdf ) {
+                } else if( (unsigned char)base_text[index-1] > 0x7f && 
+                           (unsigned char)base_text[index-1] < 0xe0 || 
+                           (unsigned char)base_text[index-1] > 0xdf )
+                { 
+                  ++index;
+                } else {
 		// Now go backwards, looking for whitespace to split on
 		if (base_text[index] == '\r')
 			index++;
@@ -355,7 +365,7 @@ static bool calculate_line(char *base_text, short width, short start_index, shor
 			if (break_point != start_index)
 				index = break_point+1;	// Space at the end of the line
 		}
-		
+                }		
 		*end_index= index;
 	} else
 		done = true;
@@ -617,6 +627,10 @@ void TerminalText::Decompile(std::ostream& stream) const
 			{
 				std::string temp;
 				temp += text_[index];
+                                if( text_[index] > 0x7F && text_[index] < 0xE0 || text_[index] > 0xDF ) {
+                                  temp += text_[index+1];
+                                  ++index;
+                                }
 				stream << mac_roman_to_utf8(temp);
 				++index;
 			}

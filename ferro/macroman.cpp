@@ -24,7 +24,8 @@
 
 #include "ferro/macroman.h"
 #include "ferro/cstypes.h"
-
+#include <iconv.h>
+#include <stdio.h>
 #include <map>
 
 class MacRomanUnicodeConverter
@@ -103,14 +104,13 @@ MacRomanUnicodeConverter::MacRomanUnicodeConverter()
 }
 
 static MacRomanUnicodeConverter macRomanUnicodeConverter;
-
 void mac_roman_to_unicode(const char *input, uint16 *output)
 {
 	const char *p = input;
-
+  iconv_t S2U = iconv_open("SHIFT_JIS", "UCS-2-INTERNAL");
 	while (*p)
 	{
-		*output++ = macRomanUnicodeConverter.ToUnicode(*p++);
+              *output++ = macRomanUnicodeConverter.ToUnicode(*p++);
 	}
 	*output = 0x0;
 }
@@ -177,28 +177,52 @@ static uint16 utf8_to_unicode(const char *s, int &chars_used)
 
 std::string mac_roman_to_utf8(const std::string& input)
 {
-	const char *p = input.data();
-	std::string output;
-	while (*p)
-	{
-		uint16 uc = mac_roman_to_unicode(*p++);
-		unicode_to_utf8(uc, output);
-	}
-
-	return output;
+  iconv_t sjis2utf8 = iconv_open("UTF-8", "SHIFT_JIS");
+  iconv_t roman2utf8 = iconv_open( "UTF-8", "MacRoman");
+  const char *p = input.data();
+  size_t inbufLeft = input.size(), outbufLeft = input.size() * 4 ;
+  char* outputBuf = new char[outbufLeft + 1];
+  char* outputBufp = outputBuf;
+  std::string output;
+  while( inbufLeft ) {
+    /* try shift-jis first
+     because the coversion from MacRoman to UTF-8 always scceed
+    */
+    if( iconv(sjis2utf8, &p, &inbufLeft, &outputBufp, &outbufLeft) == size_t(-1) ) {
+      // Error when convert shift-jis to UTF-8, so try macroman to UTF-8(only one letter)
+      size_t left = 2;
+      iconv(roman2utf8, &p, &left, &outputBufp, &outbufLeft);
+      --inbufLeft;
+    }
+  }
+  *outputBufp = '\0';
+  output = outputBuf;
+  delete [] outputBuf;
+  return output;
 }
 
 std::string utf8_to_mac_roman(const std::string& input)
 {
-	const char *p = input.data();
-	std::string output;
-	while (*p)
-	{
-		int advance = 0;
-		uint16 uc = utf8_to_unicode(p, advance);
-		output += unicode_to_mac_roman(uc);
-		p += advance;
-	}
-
-	return output;
+  iconv_t utf82sjis = iconv_open("SHIFT_JIS", "UTF-8");
+  iconv_t utf82roman = iconv_open("MacRoman", "UTF-8");
+  const char *p = input.data();
+  size_t inbufLeft = input.size(), outbufLeft = input.size() * 4 ;
+  char* outputBuf = new char[outbufLeft + 1];
+  char* outputBufp = outputBuf;
+  std::string output;
+  while( inbufLeft ) {
+    /* try shift-jis first
+    because the coversion from MacRoman to UTF-8 always scceed
+    */
+    if( iconv(utf82sjis, &p, &inbufLeft, &outputBufp, &outbufLeft) == size_t(-1) ) {
+      // Error when convert shift-jis to UTF-8, so try macroman to UTF-8(only one letter)
+      size_t left = 1;
+      iconv(utf82roman, &p, &inbufLeft, &outputBufp, &left);
+      --inbufLeft;
+    }
+  }
+  *outputBufp = '\0';
+  output = outputBuf;
+  delete [] outputBuf;
+  return output;
 }

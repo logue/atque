@@ -23,14 +23,14 @@ AtqueWindow::AtqueWindow(wxWindow* parent, int id, const wxString& title, const 
     panel_1 = new wxPanel(this, wxID_ANY);
     menuBar = new wxMenuBar();
     wxMenu* fileMenu = new wxMenu();
-    fileMenu->Append(wxID_ABOUT, wxT("About Atque..."), wxEmptyString, wxITEM_NORMAL);
+    fileMenu->Append(wxID_ABOUT, wxT("Atqueについて"), wxEmptyString, wxITEM_NORMAL);
     fileMenu->AppendSeparator();
-    fileMenu->Append(MENU_Split, wxT("Split..."), wxEmptyString, wxITEM_NORMAL);
-    fileMenu->Append(MENU_Merge, wxT("Merge..."), wxEmptyString, wxITEM_NORMAL);
-    fileMenu->Append(wxID_EXIT, wxT("&Quit"), wxEmptyString, wxITEM_NORMAL);
-    menuBar->Append(fileMenu, wxT("File"));
+    fileMenu->Append(MENU_Split, wxT("分割"), wxEmptyString, wxITEM_NORMAL);
+    fileMenu->Append(MENU_Merge, wxT("マージ"), wxEmptyString, wxITEM_NORMAL);
+    fileMenu->Append(wxID_EXIT, wxT("終了(&Q)"), wxEmptyString, wxITEM_NORMAL);
+    menuBar->Append(fileMenu, wxT("ファイル(&F)"));
     SetMenuBar(menuBar);
-    instructions = new wxStaticText(panel_1, wxID_ANY, wxT("Drag and drop a file to split, or a folder to merge."), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
+    instructions = new wxStaticText(panel_1, wxID_ANY, wxT("ファイルをドラッグ＆ドロップすると分割。フォルダをドラッグ＆ドロップするとマージ。"), wxDefaultPosition, wxDefaultSize, wxALIGN_CENTRE);
 
     set_properties();
     do_layout();
@@ -52,7 +52,7 @@ END_EVENT_TABLE();
 
 void AtqueWindow::OnAbout(wxCommandEvent &event)
 {
-    wxMessageBox(wxT("Atque 1.1.1 (C) 2008-2011 Gregory Smith\n\nAtque is licensed under the GNU GPL. See COPYING.txt"), wxT("About Atque"), wxOK);
+    wxMessageBox(wxT("Atque 1.1.1 (C) 2008-2011 Gregory Smith\n\nAtqueはGNU GPLでライセンスされています。詳細はCOPYING.txtにて"), wxT("Atqueについて"), wxOK);
 }
 
 
@@ -63,7 +63,7 @@ void AtqueWindow::OnMerge(wxCommandEvent &event)
     wxString Directory;
     config.Read(wxT("Merge/DefaultDirectory/Load"), &Directory, wxT(""));
     wxDirDialog *openDirDialog = new wxDirDialog(this,
-						 wxT("Choose a folder to merge"),
+						 wxT("マージしたいフォルダを選んでください。"),
 						 Directory,
 						 wxDD_DIR_MUST_EXIST);
     if (openDirDialog->ShowModal() == wxID_OK)
@@ -80,11 +80,11 @@ void AtqueWindow::OnSplit(wxCommandEvent &event)
     wxString Directory;
     config.Read(wxT("Split/DefaultDirectory/Load"), &Directory, wxT(""));
     wxFileDialog *openFileDialog = new wxFileDialog(this,
-						    wxT("Choose file"),
+						    wxT("分割したいファイルを選んでください。"),
 						    Directory,
 						    wxT(""),
-						    wxT("Scenario files|*.sceA;*.imgA|All files|*.*"),
-						    wxFD_OPEN);
+						    wxT("シナリオファイル|*.sceA;*.imgA|全てのファイル|*.*"),
+						    wxOPEN);
     if (openFileDialog->ShowModal() == wxID_OK)
     {
 	Split(openFileDialog->GetPath());
@@ -107,11 +107,11 @@ void AtqueWindow::Split(const wxString& file)
     wxString Directory;
     config.Read(wxT("Split/DefaultDirectory/Save"), &Directory, wxT(""));
     wxFileDialog *saveFileDialog = new wxFileDialog(this,
-						    wxT("Split files into folder:"),
+						    wxT("分割したファイルの保存先のフォルダ"),
 						    Directory,
 						    wxT("Split Map Folder"),
 						    wxT(""),
-						    wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+						    wxSAVE | wxOVERWRITE_PROMPT);
     if (saveFileDialog->ShowModal() == wxID_OK)
     {
 	wxBusyCursor busy;
@@ -125,7 +125,7 @@ void AtqueWindow::Split(const wxString& file)
 	std::stringstream log;
 
 	wxLogWindow* logWindow = new wxLogWindow(this,
-						 wxT("Split Log (") + file + wxT(")"),
+						 wxT("分割ログ（") + file + wxT("）"),
 						 true,
 						 false);
 	try
@@ -138,11 +138,11 @@ void AtqueWindow::Split(const wxString& file)
 		{
 			wxLogMessage(wxString(line.c_str(), wxConvUTF8));
 		}
-		wxLogMessage(wxT("Split successful"));
+		wxLogMessage(wxT("分割に成功しました。"));
 	}
 	catch (const atque::split_error& e)
 	{
-		wxLogMessage(wxT("Split failed: " + wxString(e.what(), wxConvUTF8)));
+		wxLogMessage(wxT("分割に失敗：" + wxString(e.what(), wxConvUTF8)));
 	}
     }
 }
@@ -154,11 +154,11 @@ void AtqueWindow::Merge(const wxString& folder)
     wxString Directory;
     config.Read(wxT("Merge/DefaultDirectory/Save"), &Directory, wxT(""));
     wxFileDialog *saveFileDialog = new wxFileDialog(this,
-						    wxT("Merge files into:"),
+						    wxT("マージしたファイルの保存先："),
 						    wxT(""),
-						    wxT("Merged Map Files.sceA"),
+						    wxT("マージ済みマップ.sceA"),
 						    wxT(""),
-						    wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+						    wxSAVE | wxOVERWRITE_PROMPT);
     if (saveFileDialog->ShowModal() == wxID_OK)
     {
 	wxBusyCursor busy;
@@ -169,7 +169,7 @@ void AtqueWindow::Merge(const wxString& folder)
 
 	std::stringstream log;
 	wxLogWindow* logWindow = new wxLogWindow(this,
-						 wxT("Merge Log (") + filename + wxT(")"),
+						 wxT("マージログ（") + filename + wxT("）"),
 						     true,
 						     false);
 	try
@@ -182,11 +182,11 @@ void AtqueWindow::Merge(const wxString& folder)
 		{
 			wxLogMessage(wxString(line.c_str(), wxConvUTF8));
 		}
-		wxLogMessage(wxT("Merge successful"));
+		wxLogMessage(wxT("マージは成功しました。"));
 	}
 	catch (const atque::merge_error& e)
 	{
-		wxLogMessage(wxT("Merge failed: " + wxString(e.what(), wxConvUTF8)));
+		wxLogMessage(wxT("マージ失敗：" + wxString(e.what(), wxConvUTF8)));
 	}
     }
 }
