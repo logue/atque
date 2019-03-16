@@ -26,8 +26,8 @@ int main(int argc, char *argv[])
 {
 	if (argc != 3)
 	{
-		std::cerr << "Usage: atques <source> <dest_folder>" << std::endl;
-//		std::cerr << "使用方法：atques <元のファイル> <出力先のディレクトリ>" << std::endl;
+//		std::cerr << "Usage: atques <source> <dest_folder>" << std::endl;
+		std::cerr << "使用方法：atques <元のファイル> <出力先のディレクトリ>" << std::endl;
 		return 1;
 	}
 

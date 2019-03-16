@@ -28,8 +28,8 @@ int main(int argc, char *argv[])
 {
 	if (argc != 3)
 	{
-		std::cerr << "Usage: atquem <source> <dest>" << std::endl;
-//		std::cerr << "使用方法：atquem <元のディレクトリ> <保存ファイル名>" << std::endl;
+//		std::cerr << "Usage: atquem <source> <dest>" << std::endl;
+		std::cerr << "使用方法：atquem <元のディレクトリ> <保存ファイル名>" << std::endl;
 		return 1;
 	}
 

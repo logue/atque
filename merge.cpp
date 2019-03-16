@@ -1,21 +1,21 @@
 /* merge.cpp
 
    Copyright (C) 2008 by Gregory Smith
-   
+
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License as
    published by the Free Software Foundation; either version 2 of the
    License, or (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful, but
    WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    General Public License for more details.
-   
+
    This license is contained in the file "COPYING", which is included
    with this source code; it is available online at
    http://www.gnu.org/licenses/gpl.html
-   
+
 */
 
 /*
@@ -59,7 +59,7 @@ static std::vector<uint8> ReadFile(const std::string& path)
 {
 	std::ifstream infile;
 	infile.open(path.c_str(), std::ios::binary);
-	
+
 	infile.seekg(0, std::ios::end);
 	int length = infile.tellg();
 	infile.seekg(0, std::ios::beg);
@@ -104,7 +104,7 @@ void MergeShapes(const fs::path& path, marathon::Wad& wad, std::ostream& log)
 	if (length <= 384 * 1024)
 	{
 		std::vector<uint8> shapes_buffer(length);
-		
+
 		shapes.seekg(0);
 		shapes.read(reinterpret_cast<char*>(&shapes_buffer[0]), shapes_buffer.size());
 		wad.AddChunk(shapes_tag, shapes_buffer);
@@ -119,7 +119,7 @@ void MergeShapes(const fs::path& path, marathon::Wad& wad, std::ostream& log)
 
 void MergeTerminal(const fs::path& path, marathon::Wad& wad, std::ostream& log)
 {
-	try 
+	try
 	{
 		marathon::TerminalChunk chunk;
 		chunk.Compile(path.string());
@@ -167,8 +167,8 @@ marathon::Wad CreateWad(const fs::path& path, std::ostream& log)
 	std::vector<fs::path> terminals;
 	std::vector<fs::path> luas;
 	std::vector<fs::path> mmls;
-	
-	std::vector<fs::path> dir = path.ls();	
+
+	std::vector<fs::path> dir = path.ls();
 	for (std::vector<fs::path>::iterator it = dir.begin(); it != dir.end(); ++it)
 	{
 		if (it->filename()[0] == '.')
@@ -202,7 +202,7 @@ marathon::Wad CreateWad(const fs::path& path, std::ostream& log)
 		{
 			wad = wadfile.GetWad(0);
 
-			
+
 			if (physics.size())
 			{
 				if (physics.size() > 1)
@@ -327,7 +327,7 @@ void MergeTEXTs(marathon::Unimap& wadfile, const fs::path& path)
 			}
 		}
 	}
-	
+
 }
 
 void MergeResources(marathon::Unimap& wadfile, const fs::path& path)
@@ -398,7 +398,7 @@ void atque::merge(const std::string& src, const std::string& dest, std::ostream&
 	marathon::Unimap wadfile;
 	fs::path level_select_path(src);
 	level_select_path = level_select_path / "Level Select Names.txt";
-	
+
 	std::map<int16, std::string> level_select_names;
 	if (level_select_path.exists())
 	{
@@ -433,13 +433,13 @@ void atque::merge(const std::string& src, const std::string& dest, std::ostream&
 				{
 					while (!s.fail() && s.peek() == ' ')
 						s.get();
-					
+
 					if (!s.fail())
 					{
 						std::string level_name;
 						std::getline(s, level_name);
 						wadfile.SetWad(index, CreateWad(*it, log));
-					} 
+					}
 				}
 			}
 		}
@@ -455,5 +455,5 @@ void atque::merge(const std::string& src, const std::string& dest, std::ostream&
 
 	wadfile.file_name(fs::basename(fs::path(dest).filename()));
 	wadfile.Save(dest);
-	
+
 }

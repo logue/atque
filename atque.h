@@ -16,13 +16,16 @@
 // begin wxGlade: ::extracode
 // end wxGlade
 
+#ifndef _P_WAIT /* just in case */
+# define _P_WAIT                0
+#endif
 
 class AtqueWindow: public wxFrame {
 public:
     // begin wxGlade: AtqueWindow::ids
     enum {
-        MENU_Split = wxID_HIGHEST + 1002,
-        MENU_Merge = wxID_HIGHEST + 1003
+        MENU_Split = wxID_HIGHEST + 1000,
+        MENU_Merge = wxID_HIGHEST + 1001,
     };
     // end wxGlade
 
@@ -36,6 +39,7 @@ private:
 
 protected:
     // begin wxGlade: AtqueWindow::attributes
+    wxMenu* fileMenu;
     wxMenuBar* menuBar;
     wxStaticText* instructions;
     wxPanel* panel_1;

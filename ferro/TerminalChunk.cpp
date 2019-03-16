@@ -20,7 +20,6 @@
 
 #include "AStream.h"
 #include "ferro/macroman.h"
-#include "ferro/converter.h"
 #include "ferro/TerminalChunk.h"
 
 #include <fstream>

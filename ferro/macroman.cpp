@@ -179,7 +179,7 @@ std::string mac_roman_to_utf8(const std::string& input)
 {
   iconv_t sjis2utf8 = iconv_open("UTF-8", "SHIFT_JIS");
   iconv_t roman2utf8 = iconv_open( "UTF-8", "MacRoman");
-  const char *p = input.data();
+  char *p = const_cast<char*>(input.data());
   size_t inbufLeft = input.size(), outbufLeft = input.size() * 4 ;
   char* outputBuf = new char[outbufLeft + 1];
   char* outputBufp = outputBuf;
@@ -188,7 +188,7 @@ std::string mac_roman_to_utf8(const std::string& input)
     /* try shift-jis first
      because the coversion from MacRoman to UTF-8 always scceed
     */
-    if( iconv(sjis2utf8, &p, &inbufLeft, &outputBufp, &outbufLeft) == size_t(-1) ) {
+	  if( iconv(sjis2utf8, &p, &inbufLeft, &outputBufp, &outbufLeft) == size_t(-1) ) {
       // Error when convert shift-jis to UTF-8, so try macroman to UTF-8(only one letter)
       size_t left = 2;
       iconv(roman2utf8, &p, &left, &outputBufp, &outbufLeft);
@@ -205,7 +205,7 @@ std::string utf8_to_mac_roman(const std::string& input)
 {
   iconv_t utf82sjis = iconv_open("SHIFT_JIS", "UTF-8");
   iconv_t utf82roman = iconv_open("MacRoman", "UTF-8");
-  const char *p = input.data();
+  char *p = const_cast<char*>(input.data());
   size_t inbufLeft = input.size(), outbufLeft = input.size() * 4 ;
   char* outputBuf = new char[outbufLeft + 1];
   char* outputBufp = outputBuf;
@@ -214,7 +214,7 @@ std::string utf8_to_mac_roman(const std::string& input)
     /* try shift-jis first
     because the coversion from MacRoman to UTF-8 always scceed
     */
-    if( iconv(utf82sjis, &p, &inbufLeft, &outputBufp, &outbufLeft) == size_t(-1) ) {
+	  if( iconv(utf82sjis, &p, &inbufLeft, &outputBufp, &outbufLeft) == size_t(-1) ) {
       // Error when convert shift-jis to UTF-8, so try macroman to UTF-8(only one letter)
       size_t left = 1;
       iconv(utf82roman, &p, &inbufLeft, &outputBufp, &left);
