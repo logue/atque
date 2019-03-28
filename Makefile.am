@@ -31,8 +31,8 @@ atquem_LDADD = ferro/libferro.a
 if BUILD_ATQUEGUI
 ATQUE_SOURCES=atque.h atque.cpp split.cpp split.h merge.cpp merge.h filesystem.h $(RESOURCE_SRCS)
 if MAKE_WINDOWS
-atque-resources.o:
-	$(WX_RESCOMP) -o atque-resources.o -I$(srcdir) $(srcdir)/atque.rc
+atque-resources.o: $(srcdir)/atque.rc
+	@WX_RESCOMP@ -i $^ -O coff -o $@
 Atque_LDADD=atque-resources.o ferro/libferro.a
 Atque_SOURCES=$(ATQUE_SOURCES)
 else

@@ -24,8 +24,17 @@
 
 #include "ferro/macroman.h"
 #include "ferro/cstypes.h"
+#ifdef HAVE_LIBICONV
 #include <iconv.h>
+#elif HAVE_ICU
+#include <unicode/unistr.h>
+#include <vector>
+#else 
+#include <boost/locale/encoding.hpp>
+namespace conv = boost::locale::conv;
+#endif
 #include <stdio.h>
+#include <iostream>
 #include <map>
 
 class MacRomanUnicodeConverter
@@ -107,10 +116,9 @@ static MacRomanUnicodeConverter macRomanUnicodeConverter;
 void mac_roman_to_unicode(const char *input, uint16 *output)
 {
 	const char *p = input;
-  iconv_t S2U = iconv_open("SHIFT_JIS", "UCS-2-INTERNAL");
 	while (*p)
 	{
-              *output++ = macRomanUnicodeConverter.ToUnicode(*p++);
+		*output++ = macRomanUnicodeConverter.ToUnicode(*p++);
 	}
 	*output = 0x0;
 }
@@ -177,52 +185,78 @@ static uint16 utf8_to_unicode(const char *s, int &chars_used)
 
 std::string mac_roman_to_utf8(const std::string& input)
 {
-  iconv_t sjis2utf8 = iconv_open("UTF-8", "SHIFT_JIS");
-  iconv_t roman2utf8 = iconv_open( "UTF-8", "MacRoman");
-  char *p = const_cast<char*>(input.data());
-  size_t inbufLeft = input.size(), outbufLeft = input.size() * 4 ;
-  char* outputBuf = new char[outbufLeft + 1];
-  char* outputBufp = outputBuf;
-  std::string output;
-  while( inbufLeft ) {
-    /* try shift-jis first
-     because the coversion from MacRoman to UTF-8 always scceed
-    */
-	  if( iconv(sjis2utf8, &p, &inbufLeft, &outputBufp, &outbufLeft) == size_t(-1) ) {
-      // Error when convert shift-jis to UTF-8, so try macroman to UTF-8(only one letter)
-      size_t left = 2;
-      iconv(roman2utf8, &p, &left, &outputBufp, &outbufLeft);
-      --inbufLeft;
-    }
-  }
-  *outputBufp = '\0';
-  output = outputBuf;
-  delete [] outputBuf;
-  return output;
+#ifdef HAVE_LIBICONV 
+	iconv_t sjis2utf8 = iconv_open("UTF-8", "SHIFT_JIS");
+	iconv_t roman2utf8 = iconv_open( "UTF-8", "MacRoman");
+	char *p = const_cast<char*>(input.data());
+	size_t inbufLeft = input.size(), outbufLeft = input.size() * 4 ;
+	char* outputBuf = new char[outbufLeft + 1];
+	char* outputBufp = outputBuf;
+	std::string output;
+	while( inbufLeft ) {
+		// try shift-jis first
+		// because the coversion from MacRoman to UTF-8 always scceed
+		if( iconv(sjis2utf8, &p, &inbufLeft, &outputBufp, &outbufLeft) == size_t(-1) ) {
+			// Error when convert shift-jis to UTF-8, so try macroman to UTF-8(only one letter)
+			size_t left = 2;
+			iconv(roman2utf8, &p, &left, &outputBufp, &outbufLeft);
+			--inbufLeft;
+		}
+	}
+	iconv_close(sjis2utf8);
+	iconv_close(roman2utf8);
+	*outputBufp = '\0';
+	output = outputBuf;
+	delete [] outputBuf;
+	return output;
+#elif HAVE_ICU
+	icu::UnicodeString src(input.c_str(), "SHIFT_JIS");
+	int length = src.extract(0, src.length(), NULL, "UTF-8");
+
+	std::vector<char> result(length + 1);
+	src.extract(0, src.length(), &result[0], "UTF-8");
+
+	return std::string(result.begin(), result.end() - 1);
+#else
+	return conv::to_utf<char>(input, "Shift_JIS");
+#endif
 }
 
 std::string utf8_to_mac_roman(const std::string& input)
 {
-  iconv_t utf82sjis = iconv_open("SHIFT_JIS", "UTF-8");
-  iconv_t utf82roman = iconv_open("MacRoman", "UTF-8");
-  char *p = const_cast<char*>(input.data());
-  size_t inbufLeft = input.size(), outbufLeft = input.size() * 4 ;
-  char* outputBuf = new char[outbufLeft + 1];
-  char* outputBufp = outputBuf;
-  std::string output;
-  while( inbufLeft ) {
-    /* try shift-jis first
-    because the coversion from MacRoman to UTF-8 always scceed
-    */
-	  if( iconv(utf82sjis, &p, &inbufLeft, &outputBufp, &outbufLeft) == size_t(-1) ) {
-      // Error when convert shift-jis to UTF-8, so try macroman to UTF-8(only one letter)
-      size_t left = 1;
-      iconv(utf82roman, &p, &inbufLeft, &outputBufp, &left);
-      --inbufLeft;
-    }
-  }
-  *outputBufp = '\0';
-  output = outputBuf;
-  delete [] outputBuf;
-  return output;
+#ifdef HAVE_LIBICONV
+	iconv_t utf82sjis = iconv_open("SHIFT_JIS", "UTF-8");
+	iconv_t utf82roman = iconv_open("MacRoman", "UTF-8");
+	char *p = const_cast<char*>(input.data());
+	size_t inbufLeft = input.size(), outbufLeft = input.size() * 4 ;
+	char* outputBuf = new char[outbufLeft + 1];
+	char* outputBufp = outputBuf;
+	std::string output;
+	while( inbufLeft ) {
+		// try shift-jis first
+		// because the coversion from MacRoman to UTF-8 always scceed
+		if( iconv(utf82sjis, &p, &inbufLeft, &outputBufp, &outbufLeft) == size_t(-1) ) {
+			// Error when convert shift-jis to UTF-8, so try macroman to UTF-8(only one letter)
+			size_t left = 1;
+			iconv(utf82roman, &p, &inbufLeft, &outputBufp, &left);
+			--inbufLeft;
+		}
+	}
+	iconv_close(utf82sjis);
+	iconv_close(utf82roman);
+	*outputBufp = '\0';
+	output = outputBuf;
+	delete [] outputBuf;
+	return output;
+#elif HAVE_ICU
+	icu::UnicodeString src(input.c_str(), "UTF-8");
+	int length = src.extract(0, src.length(), NULL, "Shift_JIS");
+
+	std::vector<char> result(length + 1);
+	src.extract(0, src.length(), &result[0], "Shift_JIS");
+
+	return std::string(result.begin(), result.end() - 1);
+#else
+	return conv::from_utf(input, "Shift_JIS");
+#endif
 }

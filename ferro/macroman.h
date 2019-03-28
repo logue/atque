@@ -29,5 +29,3 @@ std::string mac_roman_to_utf8(const std::string& input);
 std::string utf8_to_mac_roman(const std::string& input);
 
 #endif
-
-
