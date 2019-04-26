@@ -1,4 +1,4 @@
-AC_INIT(atque, 1.1.2, [http://sourceforge.net/tracker/?func=add&group_id=235817&atid=1097912] )
+AC_INIT([Atque], 1.1.2.2, [https://sf.net/p/igniferroque/bugs/], [atque], [http://igniferroque.sf.net/])
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_PREREQ([2.65])

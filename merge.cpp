@@ -255,7 +255,7 @@ void MergeCLUTs(marathon::Unimap& wadfile, const fs::path& path)
 			std::istringstream s(it->filename());
 			int16 index;
 			s >> index;
-			if (!s.fail() && index >= 128)
+			if (!s.fail() && index >= 0)
 			{
 				CLUTResource clut;
 				if (clut.Import(it->string()))
@@ -277,7 +277,7 @@ void MergePICTs(marathon::Unimap& wadfile, const fs::path& path)
 			std::istringstream s(it->filename());
 			int16 index;
 			s >> index;
-			if (!s.fail() && index >= 128)
+			if (!s.fail() && index >= 0)
 			{
 				PICTResource pict;
 				if (pict.Import(it->string()))
@@ -299,7 +299,7 @@ void MergeSnds(marathon::Unimap& wadfile, const fs::path& path)
 			std::istringstream s(it->filename());
 			int16 index;
 			s >> index;
-			if (!s.fail() && index >= 128)
+			if (!s.fail() && index >= 0)
 			{
 				SndResource snd;
 				if (snd.Import(it->string()))
@@ -321,7 +321,7 @@ void MergeTEXTs(marathon::Unimap& wadfile, const fs::path& path)
 			std::istringstream s(it->filename());
 			int16 index;
 			s >> index;
-			if (!s.fail() && index >= 128)
+			if (!s.fail() && index >= 0)
 			{
 				wadfile.SetResource(FOUR_CHARS_TO_INT('t','e','x','t'), index, ReadFile(it->string()));
 			}

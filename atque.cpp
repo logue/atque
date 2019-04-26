@@ -3,6 +3,7 @@
 #include "atque.h"
 #include "split.h"
 #include "merge.h"
+#include "config.h"
 #include <iostream>
 #include <sstream>
 
@@ -52,7 +53,13 @@ END_EVENT_TABLE();
 
 void AtqueWindow::OnAbout(wxCommandEvent &event)
 {
-    wxMessageBox(wxT("Atque 1.1.2 (C) 2008-2011,2018 Gregory Smith\n\nAtqueはGNU GPLでライセンスされています。詳細はCOPYING.txtにて"), wxT("Atqueについて"), wxOK);
+    wxMessageDialog *dlg = new wxMessageDialog(this,
+    	PACKAGE_STRING "\n" PACKAGE_URL "\n\n"
+    	wxT("Atque 1.1.2 (C) 2008-2011,2018 Gregory Smith") "\n\n"
+    	wxT("AtqueはGNU GPLでライセンスされています。詳細はCOPYING.txtにて"), 
+    	wxT("Atqueについて"), wxOK | wxICON_INFORMATION);
+	dlg->ShowModal();
+	dlg->Destroy();
 }
 
 
@@ -195,6 +202,9 @@ void AtqueWindow::set_properties()
 {
     // begin wxGlade: AtqueWindow::set_properties
     SetTitle(wxT("Atque"));
+    //wxIcon _icon;
+    //_icon.CopyFromBitmap(wxBitmap(wxT("./atque.svg"), wxBITMAP_TYPE_ANY));
+    //SetIcon(_icon);
     // end wxGlade
 }
 
